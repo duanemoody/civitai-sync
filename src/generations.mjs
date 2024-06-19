@@ -127,12 +127,20 @@ export async function saveGenerations (data, { overwrite = false, checkImages = 
     savedItems.push(item);
 
     try {
-      await writeFile(filepath, JSON.stringify(item, null, 2));
+      await writeFile(filepath, JSON.stringify(item, null, 2),
+       (err) => {
+         if (err)
+           console.log(err);
+         else {
+           fs.utimes(filepath, stat.atime, stat.mtime, function(err) {
+             if (err) return cb(err);
+             cb();
+           });
+         }    
+       }
+     });
     }
-
-    catch (err) {
-      console.err(err.message);
-    }
+    catch (err) {console.err(err.message);}
   }
 
   return savedItems;
